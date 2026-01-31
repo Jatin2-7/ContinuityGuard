@@ -178,9 +178,9 @@ def mock_analyze_script(script_text: str, budget_mode: str = "Medium") -> Analys
     global_breakdown_map = {}
     for scene in parsed_scenes:
         for expense in scene.expense_breakdown:
-            cat = expense.get('category', 'Misc')
+            cat = expense.category
             # Extract raw value from string
-            cost_str = expense.get('cost', '0')
+            cost_str = expense.cost
             val = 0
             if "Crores" in cost_str: val = float(cost_str.replace("Crores", "").replace("₹", "").strip()) * 10000000
             elif "Lakhs" in cost_str: val = float(cost_str.replace("Lakhs", "").replace("₹", "").strip()) * 100000
