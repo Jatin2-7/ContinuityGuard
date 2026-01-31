@@ -15,10 +15,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/api")
+@app.get("/api/")
 @app.get("/")
 def read_root():
     return {"message": "ContinuityGuard Risk Engine Online"}
 
+@app.get("/api/health")
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "backend"}
+
+@app.post("/api/analyze", response_model=AnalysisResult)
 @app.post("/analyze", response_model=AnalysisResult)
 
 def analyze_script_endpoint(
@@ -53,7 +61,8 @@ def analyze_script_endpoint(
         # Last resort fallback
         return mock_analyze_script(script_text, budget_mode)
 
-@app.post("/generate-storyboard", response_model=None) # We'll return dict directly for simplicity or define valid model
+@app.post("/api/generate-storyboard", response_model=None)
+@app.post("/generate-storyboard", response_model=None)
 async def storyboard_endpoint(
     scene_desc: str = Body(..., embed=True),
     style: str = Body("Film Noir", embed=True),
