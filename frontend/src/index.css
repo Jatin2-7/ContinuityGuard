@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-black text-white;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .glass-card {
+    @apply bg-zinc-900/40 backdrop-blur-md border border-white/10 shadow-xl transition-all duration-300;
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-zinc-800/50 to-transparent;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+background: #3f3f46;
+}
+
+@layer utilities {
+  .animate-aurora {
+    animation: aurora 20s linear infinite;
+  }
+}
+
+@keyframes aurora {
+  0% {
+    background-position: 50% 50%, 50% 50%;
+  }
+
+  100% {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
+.bg-aurora {
+  background-color: #050505;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+  background-size: 180% 180%;
+  animation: aurora 25s ease infinite alternate;
+}
