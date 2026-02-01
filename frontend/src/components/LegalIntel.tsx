@@ -69,7 +69,7 @@ export default function LegalIntel({ analysisData }: LegalIntelProps) {
                 <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
                     <h3 className="text-zinc-500 font-bold uppercase text-xs tracking-widest mb-6">Asset Clearance Status</h3>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4 mb-8">
                         {analysisData?.assets && analysisData.assets.length > 0 ? (
                             analysisData.assets.map((asset, idx) => (
                                 <div key={idx} className={`flex justify-between items-center p-3 bg-zinc-950 rounded border ${asset.status === 'Pending Sign-off' ? 'border-amber-500/50' : 'border-zinc-800'
@@ -89,6 +89,45 @@ export default function LegalIntel({ analysisData }: LegalIntelProps) {
                         ) : (
                             <div className="text-zinc-500 italic text-sm">No assets extracted from script.</div>
                         )}
+                    </div>
+
+                    {/* Interactive Compliance Checker */}
+                    <div className="border-t border-zinc-800 pt-6">
+                        <h3 className="text-zinc-500 font-bold uppercase text-xs tracking-widest mb-3">Interactive Legal Scan</h3>
+                        <textarea
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded p-3 text-sm text-zinc-300 focus:border-red-500 focus:outline-none mb-3 h-24 resize-none placeholder:text-zinc-700 font-mono"
+                            placeholder="Paste dialogue or scene description to check against Indian Laws..."
+                            id="legal-input"
+                        />
+                        <button
+                            onClick={async () => {
+                                const input = (document.getElementById('legal-input') as HTMLTextAreaElement).value;
+                                if (!input) return;
+                                const btn = document.getElementById('scan-btn')!;
+                                btn.innerText = "Scanning...";
+                                try {
+                                    const res = await fetch('/api/analyze', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ script_text: input, budget_mode: 'Medium' })
+                                    });
+                                    const data = await res.json();
+                                    if (data.compliance_risks && data.compliance_risks.length > 0) {
+                                        alert(`⚠️ RISKS FOUND:\n\n${data.compliance_risks.map((r: any) => `• ${r.category}: ${r.trigger_text}\nREQ: ${r.legal_requirement}`).join('\n\n')}`);
+                                    } else {
+                                        alert("✅ No Compliance Risks Detected.");
+                                    }
+                                } catch (e) {
+                                    alert("Error scanning.");
+                                } finally {
+                                    btn.innerText = "Scan for Censor Issues";
+                                }
+                            }}
+                            id="scan-btn"
+                            className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase py-2 rounded transition-colors"
+                        >
+                            Scan for Censor Issues
+                        </button>
                     </div>
                 </div>
             </div>

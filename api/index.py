@@ -61,22 +61,7 @@ def analyze_script_endpoint(
         # Last resort fallback
         return mock_analyze_script(script_text, budget_mode)
 
-@app.post("/api/generate-storyboard", response_model=None)
-@app.post("/generate-storyboard", response_model=None)
-async def storyboard_endpoint(
-    scene_desc: str = Body(..., embed=True),
-    style: str = Body("Film Noir", embed=True),
-    use_mock: bool = Body(False, embed=True)
-):
-    from analyzer import generate_storyboard, mock_generate_storyboard
-    api_key = os.environ.get("OPENAI_API_KEY")
-    
-    if use_mock or not api_key:
-        url = mock_generate_storyboard(scene_desc)
-    else:
-        url = generate_storyboard(scene_desc, api_key)
-        
-    return {"image_url": url}
+
 
 if __name__ == "__main__":
     import uvicorn

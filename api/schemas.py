@@ -23,6 +23,7 @@ class ContinuityError(BaseModel):
     estimated_cost: str = Field(..., description="Estimated cost to fix in dollars (e.g., '$5,000').")
     estimated_delay: str = Field(..., description="Estimated time delay caused by this error (e.g., '2 hours').")
     suggested_fix: str = Field(..., description="A creative solution or dialogue change to fix the error.")
+    reasoning: str = Field(..., description="The logic/reasoning behind why this is flagged as an error.")
     from_scene_id: Optional[str] = Field(None, description="ID of the scene where the error originates.")
     to_scene_id: Optional[str] = Field(None, description="ID of the connected scene where the error manifests.")
 

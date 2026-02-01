@@ -112,6 +112,13 @@ export default function ExecutiveDashboard({ analysisData }: ExecutiveDashboardP
     const calculateManualCost = () => {
         if (!manualSceneDesc) return;
 
+        // Validation: Reject nonsense/too short inputs
+        const trimmed = manualSceneDesc.trim();
+        if (trimmed.length < 10 || trimmed.split(/\s+/).length < 3) {
+            setManualSceneDesc("⚠️ Please describe the scene in more detail (at least 3 words).");
+            return;
+        }
+
         const text = manualSceneDesc.toUpperCase();
         let label = "Standard Scene";
         let color = "text-zinc-400";
@@ -340,13 +347,13 @@ export default function ExecutiveDashboard({ analysisData }: ExecutiveDashboardP
                                 <h3 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Predicted Script Cost</h3>
                                 <span className="text-[10px] text-zinc-600 bg-zinc-950 px-2 py-0.5 rounded">AI Estimate</span>
                             </div>
-                            <div className={`text-3xl font-bold ${scriptCost > totalBudget ? 'text-red-500' : 'text-amber-500'}`}>
-                                {scriptCost > 0 ? `₹ ${scriptCost.toFixed(2)} Cr` : '—'}
+                            <div className={`text-3xl font-bold ${scriptCost > 0 ? (scriptCost > totalBudget ? 'text-red-500' : 'text-amber-500') : 'text-zinc-600'}`}>
+                                {scriptCost > 0 ? `₹ ${scriptCost.toFixed(2)} Cr` : <span className="text-sm text-zinc-500">No Data (Run Analysis)</span>}
                             </div>
                         </div>
                         <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl relative overflow-hidden flex flex-col justify-center">
                             <h3 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest mb-1">Variance</h3>
-                            <div className={`text-3xl font-bold ${scriptCost > totalBudget ? 'text-red-500' : 'text-green-500'}`}>
+                            <div className={`text-3xl font-bold ${scriptCost > 0 ? (scriptCost > totalBudget ? 'text-red-500' : 'text-green-500') : 'text-zinc-600'}`}>
                                 {scriptCost > 0 ? (
                                     <>
                                         {scriptCost > totalBudget ? '+' : ''}{(scriptCost - totalBudget).toFixed(2)} Cr
@@ -354,7 +361,7 @@ export default function ExecutiveDashboard({ analysisData }: ExecutiveDashboardP
                                             {scriptCost > totalBudget ? '(DEFICIT)' : '(SURPLUS)'}
                                         </span>
                                     </>
-                                ) : '—'}
+                                ) : <span className="text-sm text-zinc-500">Waiting for Script...</span>}
                             </div>
                         </div>
                     </div>

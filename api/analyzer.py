@@ -32,8 +32,17 @@ Your goal: **Identify Continuity Errors that will cost CRORES** AND **Flag Censo
       - **DO NOT HOLD BACK**. If it looks expensive (Choppers, Blasts), estimate extremely high.
       - specific 'reason' string must explain the specific cost (e.g., "500 Junior Artists", "Rope Rigs", "Crane Rental").
 
-**3. COMPLIANCE & CENSOR GUARD**:
-    - Flag Smoking, Alcohol, Animals, Religion, Branding. Provide legal requirements.
+**3. REASONING & LOGIC (NEW)**:
+    - For every Continuity Error, you MUST provide a `reasoning` field.
+    - This should explain the LOGICAL DISCONNECT (e.g., "Hero cannot have a beard in Scene 4 if he shaved in Scene 3").
+    - Differentiate this from the 'description'.
+
+**4. COMPLIANCE & CENSOR GUARD (INDIAN JURISDICTION)**:
+    - Check against **Cinematograph Act, 1952** and **Guidelines for Certification**.
+    - **COTPA Act**: Strict rules for Smoking/Alcohol.
+    - **Prevention of Cruelty to Animals Act**: Any animal usage needs AWBI NOC.
+    - **Religious Sentiments**: flag anything that hurts religious sentiments (IPC Section 295A).
+    - Provide specific legal requirements and estimated fines/cuts.
 
 Output MUST be a valid JSON object matching the provided schema.
 """
@@ -222,14 +231,54 @@ def mock_analyze_script(script_text: str, budget_mode: str = "Medium") -> Analys
          f"**DIRECTOR'S FIX:** {sc1_fix} Specifically, add a 2-second action beat: 'HERO dramatically removes glasses' before the dialogue starts. This creates a clean cut point."
     )
 
-    # 2. Detailed Censor Risk
-    censor_trigger = "Smoking/Alcohol depiction detected near 'Item Song' or 'Action Block'."
-    censor_legal = (
-        "**THE LAW:** Under the Cigarettes and Other Tobacco Products Act (COTPA), significant on-screen smoking requires:\n"
-        "1. A static 'Smoking Causes Cancer' warning in the corner.\n"
-        "2. An anti-smoking ad spot before the movie and after interval.\n"
-        "**RISK:** Failing this will result in an AUTOMATIC 'A' certificate or cuts by the CBFC."
-    )
+    # 2. Detailed Censor Risk (Dynamic)
+    compliance_risks = []
+    text_upper = script_text.upper()
+
+    # Rule 1: POCSO / Women Safety
+    if any(x in text_upper for x in ["MINOR", "CHILD", "MOLEST", "RAPE", "ABUSE", "GIRL"]):
+        compliance_risks.append(ComplianceRisk(
+            category="Serious Crime / POCSO",
+            trigger_text="Depiction of crimes against women/children detected.",
+            legal_requirement="**STRICT PROHIBITION:** Under the POCSO Act and SC guidelines, graphic depiction is BANNED. \n1. Requires 'A' Certificate.\n2. Sensitive handling mandatory; no voyeuristic angles.",
+            estimated_fine="Refusal of Certificate / Legal Action"
+        ))
+
+    # Rule 2: Smoking / Alcohol
+    if any(x in text_upper for x in ["SMOKE", "CIGARETTE", "ALCOHOL", "DRINK", "SCOTCH", "WHISKY"]):
+        compliance_risks.append(ComplianceRisk(
+            category="Censor Board (COTPA)",
+            trigger_text="Smoking/Alcohol Consumption detected.",
+            legal_requirement="**MANDATORY:** \n1. Static 'Smoking Kills' warning.\n2. Anti-tobacco audiovisual spot.",
+            estimated_fine="Cuts or 'A' Certificate"
+        ))
+
+    # Rule 3: Religion
+    if any(x in text_upper for x in ["TEMPLE", "GOD", "PRAY", "RELIGION", "HINDU", "MUSLIM", "CHRISTIAN"]):
+        compliance_risks.append(ComplianceRisk(
+            category="Religious Sentiments",
+            trigger_text="Religious references detected.",
+            legal_requirement="**CAUTION:** Ensure no scenes hurt religious sentiments (IPC Section 295A).",
+            estimated_fine="Potential Lawsuits / Cuts"
+        ))
+    
+    # Rule 4: Animals
+    if any(x in text_upper for x in ["HORSE", "DOG", "TIGER", "ANIMAL", "BIRD"]):
+         compliance_risks.append(ComplianceRisk(
+            category="Animal Welfare Board (AWBI)",
+            trigger_text="Animal presence detected.",
+            legal_requirement="**NOC REQUIRED:** You usually cannot shoot with animals without pre-approval from AWBI.",
+            estimated_fine="Shoot Stoppage"
+        ))
+
+    # Default if nothing specific found but input exists
+    if not compliance_risks and len(script_text) > 10:
+         compliance_risks.append(ComplianceRisk(
+            category="General Review",
+            trigger_text="No specific triggers found.",
+            legal_requirement="Proceed with standard CBFC guidelines.",
+            estimated_fine="None"
+        ))
 
     # 3. Detailed Schedule Risk
     loc_ref = parsed_scenes[0].location if parsed_scenes else "UNKNOWN"
@@ -250,18 +299,12 @@ def mock_analyze_script(script_text: str, budget_mode: str = "Medium") -> Analys
                 estimated_cost=sc1_cost,
                 estimated_delay="2 hours",
                 suggested_fix=continuity_fix,
+                reasoning="Objects (Sunglasses) cannot disappear between continuous shots without an establishing action.",
                 from_scene_id=first_scene_id,
                 to_scene_id=next_scene_id
             )
         ],
-        compliance_risks=[
-            ComplianceRisk(
-                category="Censor Board",
-                trigger_text=censor_trigger,
-                legal_requirement=censor_legal,
-                estimated_fine="U/A certificate risk"
-            )
-        ],
+        compliance_risks=compliance_risks,
         schedule_risks=[
             ScheduleRisk(
                 scene_id=first_scene_id,
@@ -343,4 +386,9 @@ def mock_generate_storyboard(prompt: str) -> str:
     Returns a mock image URL for demo purposes.
     """
     # Return a placeholder that looks like a storyboard sketch
-    return "https://images.unsplash.com/photo-1598518619679-5847285c5c05?q=80&w=2000&auto=format&fit=crop" # Generic cinematic shot placeholder
+    # Use Pollinations.ai for free, prompt-based AI generation (No Key Required for Demo)
+    import urllib.parse
+    # SIMPLIFIED CINEMATIC PROMPT - Removing complex jargon to avoid model confusion
+    base_prompt = f"cinematic shot of {prompt}, indian film style, detailed, realistic, 8k"
+    encoded_prompt = urllib.parse.quote(base_prompt)
+    return f"https://image.pollinations.ai/prompt/{encoded_prompt}"

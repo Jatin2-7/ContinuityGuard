@@ -58,15 +58,20 @@ const Stripboard = ({ scenes, onGrouped }: { scenes: Scene[], onGrouped: (saved:
     }, [savings, onGrouped]);
 
     return (
-        <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4 mt-4">
+        <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4 mt-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-2 opacity-10 text-9xl">🧩</div>
             <h3 className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3">Shooting Stripboard (Logic Layer)</h3>
-            <div className="space-y-2">
+            <div className="mb-4 text-xs text-zinc-500 font-mono bg-zinc-950 p-2 rounded border border-zinc-800/50">
+                <span className="text-amber-600 font-bold">LOGIC:</span> Grouping scenes by Location minimizes unit moves.
+                Use <span className="text-indigo-400">Night</span> scenes as "Day Breakers" to avoid OT.
+            </div>
+            <div className="space-y-2 relative z-10">
                 {Object.entries(grouped).map(([loc, list]) => (
-                    <div key={loc} className="flex items-center">
-                        <div className="w-24 text-[10px] font-mono text-zinc-500 truncate text-right mr-2">{loc}</div>
-                        <div className="flex-1 flex gap-1 bg-zinc-800 p-1 rounded overflow-x-auto">
+                    <div key={loc} className="flex items-center group hover:bg-zinc-800/50 rounded transition-colors">
+                        <div className="w-24 text-[10px] font-mono text-zinc-500 truncate text-right mr-2 group-hover:text-zinc-300">{loc}</div>
+                        <div className="flex-1 flex gap-1 bg-zinc-800 p-1 rounded overflow-x-auto group-hover:bg-zinc-700/50 transition-colors">
                             {list.map(s => (
-                                <div key={s.id} className={`h-6 px-2 text-[10px] font-bold flex items-center justify-center rounded ${s.time?.includes('NIGHT') ? 'bg-indigo-900 text-indigo-300' : 'bg-amber-600 text-black'}`}>
+                                <div key={s.id} className={`h-6 px-2 text-[10px] font-bold flex items-center justify-center rounded ${s.time?.includes('NIGHT') ? 'bg-indigo-900 text-indigo-300 border border-indigo-700' : 'bg-amber-600 text-black border border-amber-500'} shadow-sm`}>
                                     {s.id}
                                 </div>
                             ))}
@@ -113,6 +118,7 @@ interface ContinuityError {
     estimated_cost: string;
     estimated_delay: string;
     suggested_fix: string;
+    reasoning: string;
     from_scene_id?: string;
     to_scene_id?: string;
 }
@@ -273,6 +279,24 @@ Hero drinks a bottle of SCOTCH.
 
             // Map Errors to Edges
             const newEdges: Edge[] = [];
+
+            // 1. SEQUENTIAL CONNECTIVITY EDGES (New Feature)
+            // Connect Scene 1 -> 2 -> 3 to show flow
+            for (let i = 0; i < newNodes.length - 1; i++) {
+                newEdges.push({
+                    id: `seq-${i}`,
+                    source: newNodes[i].id,
+                    target: newNodes[i + 1].id,
+                    animated: false,
+                    type: 'smoothstep',
+                    style: { stroke: '#52525b', strokeWidth: 1, strokeDasharray: '5,5' }, // Zinc-600 dashed
+                    label: 'Next Scene',
+                    labelStyle: { fill: '#71717a', fontSize: 8 },
+                    labelBgStyle: { fill: 'transparent' },
+                });
+            }
+
+            // 2. ERROR EDGES
             data.errors.forEach((error, index) => {
                 if (error.from_scene_id && error.to_scene_id) {
                     newEdges.push({
@@ -446,6 +470,10 @@ Hero drinks a bottle of SCOTCH.
                                         </span>
                                     </div>
                                     <p className="text-sm text-zinc-300 mb-3 leading-relaxed whitespace-pre-wrap">{error.description}</p>
+                                    <div className="text-xs text-zinc-500 bg-zinc-950 p-3 rounded border border-zinc-800/50 mb-2">
+                                        <span className="text-purple-400 font-bold uppercase text-[10px] block mb-1">AI Reasoning</span>
+                                        "{error.reasoning}"
+                                    </div>
                                     <div className="text-xs text-zinc-500 bg-zinc-950 p-3 rounded border border-zinc-800/50">
                                         <span className="text-amber-700 font-bold uppercase text-[10px] block mb-1">Director's Fix</span>
                                         "{error.suggested_fix}"

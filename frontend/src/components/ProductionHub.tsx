@@ -4,11 +4,10 @@ import ExecutiveDashboard from './ExecutiveDashboard';
 import ShootingCommander from './ShootingCommander';
 import ROIPredictor from './ROIPredictor';
 import LegalIntel from './LegalIntel';
-import PostProdKiller from './PostProdKiller';
 import DecisionMemory from './DecisionMemory';
 
 // Modules are now imported
-type ModuleType = 'RISK' | 'EXEC' | 'SHOOT' | 'ROI' | 'LEGAL' | 'POST' | 'MEM';
+type ModuleType = 'RISK' | 'EXEC' | 'SHOOT' | 'ROI' | 'LEGAL' | 'MEM';
 
 export default function ProductionHub() {
     // Ingest State
@@ -36,7 +35,6 @@ export default function ProductionHub() {
         { id: 'SHOOT', title: 'Shooting Commander', color: 'from-blue-600 to-cyan-600', icon: '🎥', desc: 'Call Sheets & Live Schedule' },
         { id: 'ROI', title: 'Audience & ROI', color: 'from-purple-600 to-violet-600', icon: '📈', desc: 'Hit Probability & Predictions' },
         { id: 'LEGAL', title: 'Legal & Compliance', color: 'from-red-700 to-rose-700', icon: '⚖️', desc: 'Censor Board & Contracts' },
-        { id: 'POST', title: 'Post-Prod Killer', color: 'from-pink-600 to-fuchsia-600', icon: '✂️', desc: 'Auto-Edit & Versioning' },
         { id: 'MEM', title: 'Decision Memory', color: 'from-zinc-600 to-gray-600', icon: '🧠', desc: 'Production Log & Recall' },
     ];
 
@@ -175,7 +173,6 @@ export default function ProductionHub() {
                         {activeModule === 'SHOOT' && <ShootingCommander scriptData={sharedAnalysis} />}
                         {activeModule === 'ROI' && <ROIPredictor />}
                         {activeModule === 'LEGAL' && <LegalIntel analysisData={sharedAnalysis} />}
-                        {activeModule === 'POST' && <PostProdKiller />}
                         {activeModule === 'MEM' && <DecisionMemory />}
                     </div>
                 </div>
